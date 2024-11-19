@@ -1,6 +1,6 @@
 Test comparing Jackson and Kotlin DataFrame read and write to CSV
 
-The generated schema which doesn't have lists
+The generated schema, created in Main, but not used, here just for interest.
 
 ~~~
 @DataSchema
