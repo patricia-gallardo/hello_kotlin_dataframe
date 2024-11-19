@@ -30,23 +30,19 @@ class ReferenceRecordDataframeIO {
                     val readDataFrame = DataFrame.readDelim(reader, format)
                     return readDataFrame.convertTo<ReferenceRecord> {
                         convert<String?>().with { it }
-                        convert<String?>().with { convertToList(it) }
-                        convert<String?>().with { convertToList(it) }
-                        convert<String?>().with { convertToList(it) }
+                        convert<String?>().with { fromString(it) }
+                        convert<String?>().with { fromString(it) }
+                        convert<String?>().with { fromString(it) }
                     }
                 }
         }
 
-        // Weird structure to make it easier to have breakpoints
-        private fun convertToList(it: String?): List<String>? {
-            val list = if (it == null) {
-                null
-            } else if (it.startsWith("[") && it.endsWith("]")) {
-                it.removePrefix("[").removeSuffix("]").split(",").map { it.trim() }
-            } else {
-                listOf(it)
-            }
-            return list
+        private fun fromString(listAsString: String?): List<String>? {
+            return listAsString
+                ?.removePrefix("[")
+                ?.removeSuffix("]")
+                ?.split(",")
+                ?.map { it.trim() }
         }
 
         fun write(records: List<ReferenceRecord>, fileName: String, folder: String) {
