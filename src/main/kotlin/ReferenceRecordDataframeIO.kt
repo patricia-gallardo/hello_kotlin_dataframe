@@ -24,11 +24,11 @@ class ReferenceRecordDataframeIO {
                     Log.read(parentFolder, fileName)
                     val format = CSVFormat.DEFAULT
                         .builder().setHeader()
+                        .setDelimiter(";")
                         .setRecordSeparator('\n')
                         .build()
                     val readDataFrame = DataFrame.readDelim(reader, format)
                     return readDataFrame.convertTo<ReferenceRecord> {
-                        // This is wrong too, but I clearly don't know how to do this
                         convert<String?>().with { it }
                         convert<String?>().with { convertToList(it) }
                         convert<String?>().with { convertToList(it) }
@@ -42,7 +42,7 @@ class ReferenceRecordDataframeIO {
             val list = if (it == null) {
                 null
             } else if (it.startsWith("[") && it.endsWith("]")) {
-                it.removePrefix("[").removeSuffix("]").split(",")
+                it.removePrefix("[").removeSuffix("]").split(",").map { it.trim() }
             } else {
                 listOf(it)
             }
@@ -56,7 +56,7 @@ class ReferenceRecordDataframeIO {
                     val frames = records.toDataFrame()
                     val format = CSVFormat.DEFAULT
                         .builder()
-                        .setDelimiter(",")
+                        .setDelimiter(";")
                         .setRecordSeparator('\n')
                         .setQuote(null)
                         .setNullString("")
