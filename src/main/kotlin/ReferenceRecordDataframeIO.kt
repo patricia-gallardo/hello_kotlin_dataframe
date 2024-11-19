@@ -28,12 +28,25 @@ class ReferenceRecordDataframeIO {
                         .build()
                     val readDataFrame = DataFrame.readDelim(reader, format)
                     return readDataFrame.convertTo<ReferenceRecord> {
-                        convert<String>().with { it }
-                        convert<String>().with { it.split(",") }
-                        convert<String>().with { it.split(",") }
-                        convert<String>().with { it.split(",") }
+                        // This is wrong too, but I clearly don't know how to do this
+                        convert<String?>().with { it }
+                        convert<String?>().with { convertToList(it) }
+                        convert<String?>().with { convertToList(it) }
+                        convert<String?>().with { convertToList(it) }
                     }
                 }
+        }
+
+        // Weird structure to make it easier to have breakpoints
+        private fun convertToList(it: String?): List<String>? {
+            val list = if (it == null) {
+                null
+            } else if (it.startsWith("[") && it.endsWith("]")) {
+                it.removePrefix("[").removeSuffix("]").split(",")
+            } else {
+                listOf(it)
+            }
+            return list
         }
 
         fun write(records: List<ReferenceRecord>, fileName: String, folder: String) {
