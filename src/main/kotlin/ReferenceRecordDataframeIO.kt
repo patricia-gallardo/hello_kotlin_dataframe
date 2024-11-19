@@ -13,13 +13,17 @@ import java.nio.charset.StandardCharsets
 class ReferenceRecordDataframeIO {
     companion object {
         fun read(fileName: String, folder: String): List<ReferenceRecord> {
+            val dataFrameRecords = readDataFrame(fileName, folder)
+            val records = dataFrameRecords.toList()
+            return records
+        }
+
+        fun readDataFrame(fileName: String, folder: String): DataFrame<ReferenceRecord> {
             val parentFolder = CpvFolder.get(fileName, folder)
             File(parentFolder, fileName).let { file ->
                 Log.read(parentFolder, fileName)
                 val readDataFrame = DataFrame.readCSV(file)
-                val dataFrameRecords = readDataFrame.cast<ReferenceRecord>()
-                val records = dataFrameRecords.toList()
-                return records
+                return readDataFrame.cast()
             }
         }
 
