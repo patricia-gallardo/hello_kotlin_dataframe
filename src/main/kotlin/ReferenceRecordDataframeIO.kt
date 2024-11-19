@@ -33,6 +33,15 @@ class ReferenceRecordDataframeIO {
                 .use { writer ->
                     val frames = records.toDataFrame()
                     val format = CSVFormat.DEFAULT
+                        .builder()
+                        .setDelimiter(",")
+                        .setRecordSeparator('\n')
+                        .setQuote(null)
+                        .setNullString("")
+                        .setIgnoreEmptyLines(true) // SKIP_EMPTY_LINES
+                        .setIgnoreSurroundingSpaces(true) // TRIM_SPACES
+                        .setAllowMissingColumnNames(true)
+                        .build();
                     val csvContents = frames.toCsv(format)
                     writer.write(csvContents)
                     Log.write(parentFolder, fileName)
