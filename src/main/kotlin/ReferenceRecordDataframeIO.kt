@@ -2,12 +2,11 @@ package org.example
 
 import org.apache.commons.csv.CSVFormat
 import org.jetbrains.kotlinx.dataframe.DataFrame
-import org.jetbrains.kotlinx.dataframe.api.cast
-import org.jetbrains.kotlinx.dataframe.api.toDataFrame
-import org.jetbrains.kotlinx.dataframe.api.toList
-import org.jetbrains.kotlinx.dataframe.io.readCSV
+import org.jetbrains.kotlinx.dataframe.api.*
+import org.jetbrains.kotlinx.dataframe.io.readDelim
 import org.jetbrains.kotlinx.dataframe.io.toCsv
 import java.io.File
+import java.io.FileInputStream
 import java.nio.charset.StandardCharsets
 
 class ReferenceRecordDataframeIO {
@@ -20,11 +19,21 @@ class ReferenceRecordDataframeIO {
 
         fun readDataFrame(fileName: String, folder: String): DataFrame<ReferenceRecord> {
             val parentFolder = CpvFolder.get(fileName, folder)
-            File(parentFolder, fileName).let { file ->
-                Log.read(parentFolder, fileName)
-                val readDataFrame = DataFrame.readCSV(file)
-                return readDataFrame.cast()
-            }
+            FileInputStream(File(parentFolder, fileName)).bufferedReader()
+                .use { reader ->
+                    Log.read(parentFolder, fileName)
+                    val format = CSVFormat.DEFAULT
+                        .builder().setHeader()
+                        .setRecordSeparator('\n')
+                        .build()
+                    val readDataFrame = DataFrame.readDelim(reader, format)
+                    return readDataFrame.convertTo<ReferenceRecord> {
+                        convert<String>().with { it }
+                        convert<String>().with { it.split(",") }
+                        convert<String>().with { it.split(",") }
+                        convert<String>().with { it.split(",") }
+                    }
+                }
         }
 
         fun write(records: List<ReferenceRecord>, fileName: String, folder: String) {
@@ -41,7 +50,7 @@ class ReferenceRecordDataframeIO {
                         .setIgnoreEmptyLines(true) // SKIP_EMPTY_LINES
                         .setIgnoreSurroundingSpaces(true) // TRIM_SPACES
                         .setAllowMissingColumnNames(true)
-                        .build();
+                        .build()
                     val csvContents = frames.toCsv(format)
                     writer.write(csvContents)
                     Log.write(parentFolder, fileName)
